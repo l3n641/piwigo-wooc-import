@@ -174,7 +174,13 @@ class Import
                 continue;
             }
 
-            $this->update_category($category["id"], $product->get_post_except());
+            $image_ids = $this->get_image_ids($category["id"]);
+
+            if (empty($image_ids)) {
+                continue;
+            }
+
+            $this->update_category($category["id"], $product->get_post_except(), $image_ids["id"]);
 
             $title = $this->get_max_len_word($product->get_post_title());
             $name = $title . " ($ " . $product->get_sale_price() . " )";
@@ -189,7 +195,6 @@ class Import
             }
             $this->update_images($category["id"], $name, $comment);
 
-            $image_ids = $this->get_image_ids($category["id"]);
             if ($product->get_tags()) {
                 foreach ($image_ids as $id) {
                     $this->save_image_tags($id, $product->get_tags());
@@ -232,10 +237,11 @@ class Import
 
     }
 
-    public function update_category($category_id, $post_content)
+    public function update_category($category_id, $post_content, $representative_picture_id)
     {
         $post_content = pwg_db_real_escape_string($post_content);
-        $query = sprintf("update  %s set comment ='%s' where id='%d' ", CATEGORIES_TABLE, $post_content, $category_id);
+        $sql = "update  %s set comment ='%s',representative_picture_id='%s' where id='%d' ";
+        $query = sprintf($sql, CATEGORIES_TABLE, $post_content, $representative_picture_id, $category_id);
         return pwg_query($query);
     }
 
@@ -261,7 +267,7 @@ class Import
 
     public function get_image_ids($category_id)
     {
-        $sql = "select id from %s where storage_category_id='%d' ";
+        $sql = "select id from %s where storage_category_id='%d' order by id ";
         $query = sprintf($sql, IMAGES_TABLE, $category_id);
         return pwg_db_fetch_assoc(pwg_query($query));
     }
