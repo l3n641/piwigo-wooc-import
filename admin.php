@@ -191,7 +191,7 @@ class Import
                     $size .= "<li>$item</li>";
                 }
                 $size .= "</ul>";
-                $comment = "<h2>Size Chart</h2>" . $size;
+                $comment = "<div class='size_chat'><h2 style='text-align: center'>Size Chart</h2>" . $size . '</div>';
             }
             $this->update_images($category["id"], $name, $comment);
 
